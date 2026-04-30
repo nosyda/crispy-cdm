@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDM Ultimate Platform — Smart SQL + Real Dataset</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/1.7.6/alasql.min.js"></script>
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+textarea { width:100%; height:100px; }
+.card { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
+.correct{color:green;} .wrong{color:red;}
+</style>
+</head>
+<body>
+<h1>CDM Training — Smart SQL Engine</h1>
+
+<div class="card">
+<h3>Dataset Preview</h3>
+<pre id="dataPreview"></pre>
+</div>
+
+<div class="card">
+<h3>Exercise: Find subjects with missing AE start date</h3>
+<textarea id="sqlInput"></textarea>
+<button onclick="runSQL()">Run</button>
+<pre id="output"></pre>
+</div>
+
+<script>
+
+// REALISTIC DATASET (simplified SDTM-like)
+const dm = [
+ {USUBJID:'01', SEX:'M'},
+ {USUBJID:'02', SEX:'F'}
+];
+
+const ae = [
+ {USUBJID:'01', AEDECOD:'HEADACHE', AESTDTC:null},
+ {USUBJID:'02', AEDECOD:'NAUSEA', AESTDTC:'2025-01-01'}
+];
+
+const lb = [
+ {USUBJID:'01', LBTEST:'ALT', LBSTRESN:80},
+ {USUBJID:'02', LBTEST:'ALT', LBSTRESN:25}
+];
+
+// LOAD DB
+alasql('CREATE TABLE dm');
+alasql('CREATE TABLE ae');
+alasql('CREATE TABLE lb');
+alasql.tables.dm.data = dm;
+alasql.tables.ae.data = ae;
+alasql.tables.lb.data = lb;
+
+// PREVIEW
+function preview(){
+ document.getElementById('dataPreview').innerText = JSON.stringify({dm,ae,lb},null,2);
+}
+
+// SMART SQL CHECK
+function runSQL(){
+ let query = document.getElementById('sqlInput').value.toLowerCase();
+ let output = document.getElementById('output');
+
+ try{
+ let res = alasql(query);
+ output.innerText = JSON.stringify(res,null,2);
+
+ // SMART FEEDBACK
+ if(!query.includes('from ae')){
+ output.innerHTML += '\n<span class="wrong">Hint: use AE table</span>';
+ }
+ if(!query.includes('null')){
+ output.innerHTML += '\n<span class="wrong">Hint: check NULL values</span>';
+ }
+ if(query.includes('select') && query.includes('from ae') && query.includes('null')){
+ output.innerHTML += '\n<span class="correct">Good logic ✔</span>';
+ }
+
+ } catch(e){
+ output.innerHTML = '<span class="wrong">SQL Error: '+e.message+'</span>';
+ }
+}
+
+preview();
+
+</script>
+</body>
+</html>
