@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDM Training Program - Pro Edition</title>
+
+<!-- Librairies tierces pour le dynamisme -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/1.7.6/alasql.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  :root {
+    --bg-primary: #ffffff; --bg-secondary: #f5f5f3; --bg-tertiary: #eeece6;
+    --text-primary: #1a1a18; --text-secondary: #5f5e5a;
+    --accent: #1d9e75; --border: rgba(0,0,0,0.12);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1e1e1c; --bg-secondary: #2a2a28; --bg-tertiary: #121211;
+      --text-primary: #f0ede6; --text-secondary: #a8a59e; --border: rgba(255,255,255,0.1);
+    }
+  }
+
+  body { font-family: -apple-system, sans-serif; background: var(--bg-tertiary); color: var(--text-primary); margin: 0; padding: 20px; line-height: 1.6; }
+  .app { max-width: 1100px; margin: 0 auto; }
+  
+  /* Navigation */
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; position: sticky; top: 10px; z-index: 100; background: var(--bg-tertiary); padding: 10px 0; }
+  .nav button { 
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); 
+    background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; transition: 0.2s;
+  }
+  .nav button.active { background: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+
+  /* Layout Elements */
+  .page { display: none; animation: fadeIn 0.3s; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  
+  /* Labs (SQL/Python) */
+  textarea { 
+    width: 100%; height: 120px; font-family: monospace; background: var(--bg-secondary); 
+    color: var(--text-primary); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin: 10px 0;
+  }
+  .console { background: #1e1e1e; color: #00ff00; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 13px; min-height: 40px; white-space: pre-wrap; }
+  
+  /* Badges & Progress */
+  .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+  .badge-sql { background: #e0f2fe; color: #0369a1; }
+  .badge-py { background: #fef3c7; color: #92400e; }
+  .progress-bar { background: var(--bg-secondary); height: 8px; border-radius: 4px; margin-top: 10px; }
+  .progress-fill { background: var(--accent); height: 100%; border-radius: 4px; transition: 0.5s; }
+
+  /* Flashcards */
+  .flash-box { 
+    height: 250px; display: flex; align-items: center; justify-content: center; text-align: center;
+    cursor: pointer; perspective: 1000px;
+  }
+  .flash-content { font-size: 1.2rem; font-weight: 500; padding: 20px; }
+  
+  /* Utilitaires */
+  .success { color: var(--accent); font-weight: bold; }
+  .error { color: #e11d48; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>CDM Training Program <span style="color: var(--accent)">2.0</span></h1>
+    <p style="color: var(--text-secondary)">Plateforme interactive d'apprentissage Clinical Data Management</p>
+  </header>
+
+  <nav class="nav">
+    <button class="active" onclick="showPage('overview')">Aperçu</button>
+    <button onclick="showPage('modules')">Modules</button>
+    <button onclick="showPage('sql')">SQL Lab</button>
+    <button onclick="showPage('python')">Python Lab</button>
+    <button onclick="showPage('flashcards')">Flashcards</button>
+    <button onclick="showPage('dashboard')">Analytics</button>
+  </nav>
+
+  <!-- PAGE : OVERVIEW -->
+  <div id="page-overview" class="page active">
+    <div class="grid">
+      <div class="card">
+        <h3>Votre Progression</h3>
+        <div class="progress-bar"><div id="main-progress" class="progress-fill" style="width: 15%"></div></div>
+        <p style="font-size: 12px; margin-top: 10px">Statut : Apprenti CDM</p>
+      </div>
+      <div class="card">
+        <h3>Prochaine étape</h3>
+        <p>Terminer le module sur l'intégrité des données (ALCOA++)</p>
+        <button onclick="showPage('modules')">Continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE : MODULES -->
+  <div id="page-modules" class="page">
+    <h2>Curriculum de formation</h2>
+    <div id="modules-container" class="grid"></div>
+  </div>
+
+  <!-- PAGE : SQL LAB -->
+  <div id="page-sql" class="page">
+    <div class="card">
+      <span class="badge badge-sql">Exercice Pratique</span>
+      <h2>Requêtes sur données cliniques</h2>
+      <p><strong>Scénario :</strong> Identifiez tous les patients de sexe féminin (F) âgés de plus de 50 ans dans la table <code>DM</code> (Demographics).</p>
+      <textarea id="sql-input">SELECT * FROM dm WHERE ...</textarea>
+      <button onclick="runSQL()" style="background: var(--accent); color: white; border: none;">Exécuter la requête</button>
+      <h3>Console de sortie :</h3>
+      <div id="sql-output" class="console">En attente d'exécution...</div>
+    </div>
+  </div>
+
+  <!-- PAGE : PYTHON LAB -->
+  <div id="page-python" class="page">
+    <div class="card">
+      <span class="badge badge-py">Data Cleaning</span>
+      <h2>Logique de validation Python</h2>
+      <p><strong>Tâche :</strong> Écrivez la condition pour détecter une valeur anormale de Lab (ALAT) supérieure à 3x la limite haute (ULN = 40).</p>
+      <textarea id="py-input">if row['ALT'] > ... :
+    flag = "High Alert"</textarea>
+      <button onclick="runPython()" style="background: #f59e0b; color: white; border: none;">Vérifier le script</button>
+      <div id="py-output" class="console"></div>
+    </div>
+  </div>
+
+  <!-- PAGE : FLASHCARDS -->
+  <div id="page-flashcards" class="page">
+    <div class="card flash-box" onclick="flipCard()">
+      <div id="flash-card" class="flash-content">Cliquez pour commencer</div>
+    </div>
+    <div style="text-align: center; margin-top: 1rem;">
+      <button onclick="prevCard()">Précédent</button>
+      <button onclick="nextCard()">Suivant</button>
+    </div>
+  </div>
+
+  <!-- PAGE : DASHBOARD -->
+  <div id="page-dashboard" class="page">
+    <div class="card">
+      <h2>Indicateurs de Qualité (KRI)</h2>
+      <canvas id="kriChart" width="400" height="150"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// --- DONNÉES DE SIMULATION ---
+const DB_DATA = {
+  dm: [
+    {USUBJID: '001', AGE: 45, SEX: 'M', ARM: 'Placebo'},
+    {USUBJID: '002', AGE: 62, SEX: 'F', ARM: 'Active drug'},
+    {USUBJID: '003', AGE: 55, SEX: 'F', ARM: 'Placebo'},
+    {USUBJID: '004', AGE: 30, SEX: 'M', ARM: 'Active drug'}
+  ],
+  ae: [
+    {USUBJID: '001', AETERM: 'Headache', AESER: 'N'},
+    {USUBJID: '002', AETERM: 'Nausea', AESER: 'Y'}
+  ]
+};
+
+const FLASHCARDS = [
+  { q: "Qu'est-ce que l'ALCOA++ ?", a: "Attributable, Legible, Contemporaneous, Original, Accurate + Complete, Consistent, Enduring, Available." },
+  { q: "Rôle de CDASH ?", a: "Standardise la collecte des données (CRF) pour faciliter le passage au format SDTM." },
+  { q: "Différence entre SAE et AE ?", a: "Un SAE est un événement grave (hospitalisation, décès, menace vitale) nécessitant un rapport en 24h." }
+];
+
+// --- INITIALISATION ALASQL ---
+alasql("CREATE TABLE dm; SELECT * INTO dm FROM ?", [DB_DATA.dm]);
+alasql("CREATE TABLE ae; SELECT * INTO ae FROM ?", [DB_DATA.ae]);
+
+// --- LOGIQUE DE NAVIGATION ---
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+  
+  if(id === 'dashboard') initChart();
+}
+
+// --- MODULES RENDERER ---
+const modules = [
+  { id: 1, title: "Réglementation GCP R3", desc: "Focus sur le Quality by Design (QbD)", progress: 100 },
+  { id: 2, title: "Setup EDC & DMP", desc: "Design des eCRF et Plan de gestion", progress: 40 },
+  { id: 3, title: "CDISC Standards", desc: "SDTM et ADaM Essentials", progress: 0 }
+];
+
+function renderModules() {
+  const container = document.getElementById('modules-container');
+  container.innerHTML = modules.map(m => `
+    <div class="card">
+      <span class="badge" style="background: #eee">Module ${m.id}</span>
+      <h3>${m.title}</h3>
+      <p style="font-size: 13px; color: var(--text-secondary)">${m.desc}</p>
+      <div class="progress-bar"><div class="progress-fill" style="width: ${m.progress}%"></div></div>
+    </div>
+  `).join('');
+}
+
+// --- MOTEUR SQL ---
+function runSQL() {
+  const input = document.getElementById('sql-input').value;
+  const output = document.getElementById('sql-output');
+  try {
+    const result = alasql(input);
+    if (result.length > 0) {
+      output.innerHTML = `<span class="success">Succès ! ${result.length} ligne(s) trouvée(s) :</span>\n` + JSON.stringify(result, null, 2);
+    } else {
+      output.innerHTML = "Requête valide, mais aucun résultat trouvé.";
+    }
+  } catch (err) {
+    output.innerHTML = `<span class="error">Erreur SQL : ${err.message}</span>`;
+  }
+}
+
+// --- MOTEUR PYTHON (SIMULÉ) ---
+function runPython() {
+  const code = document.getElementById('py-input').value;
+  const output = document.getElementById('py-output');
+  // Simulation de validation de logique
+  if (code.includes('120') || code.includes('3 * 40') || (code.includes('>') && code.includes('40'))) {
+    output.innerHTML = `<span class="success">✔ Logique correcte !</span>\nOutput: [ID: 001] ALT Alert: 80 (Limit: 40)`;
+  } else {
+    output.innerHTML = `<span class="error">Logique incomplète. Indice : ULN est 40, le seuil est 3x ULN.</span>`;
+  }
+}
+
+// --- FLASHCARDS LOGIQUE ---
+let currentCard = 0;
+let isFlipped = false;
+
+function renderCard() {
+  const card = FLASHCARDS[currentCard];
+  document.getElementById('flash-card').innerText = isFlipped ? card.a : card.q;
+  document.getElementById('flash-card').style.color = isFlipped ? 'var(--accent)' : 'var(--text-primary)';
+}
+
+function flipCard() { isFlipped = !isFlipped; renderCard(); }
+function nextCard() { currentCard = (currentCard + 1) % FLASHCARDS.length; isFlipped = false; renderCard(); }
+function prevCard() { currentCard = (currentCard - 1 + FLASHCARDS.length) % FLASHCARDS.length; isFlipped = false; renderCard(); }
+
+// --- DASHBOARD CHART ---
+function initChart() {
+  const ctx = document.getElementById('kriChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+      datasets: [{
+        label: 'Queries ouvertes (Moyenne)',
+        data: [12, 19, 8, 5],
+        borderColor: '#1d9e75',
+        tension: 0.4
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+// Lancement
+renderModules();
+renderCard();
+</script>
+
+</body>
+</html>
