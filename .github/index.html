@@ -3,203 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CDM Training Program - Full Content Edition</title>
-    
-    <!-- Moteurs dynamiques de la partie 2 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/1.7.6/alasql.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>CDM Elite Masterclass Application</title>
     <style>
         :root {
-            --bg-primary: #ffffff; --bg-secondary: #f5f5f3; --bg-tertiary: #eeece6;
-            --text-primary: #1a1a18; --text-secondary: #5f5e5a;
-            --accent: #1d9e75; --border: rgba(0,0,0,0.12);
-            --radius: 10px;
+            --bg: #0b0f1a; --card: #161e2d; --accent: #10b981; --text: #e2e8f0;
+            --text-dim: #94a3b8; --border: #2d3748; --blue: #3b82f6; --orange: #f59e0b;
         }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #1e1e1c; --bg-secondary: #2a2a28; --bg-tertiary: #121211;
-                --text-primary: #f0ede6; --text-secondary: #a8a59e; --border: rgba(255,255,255,0.1);
-            }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); line-height: 1.5; }
+        
+        /* Layout */
+        .app-container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        header { border-bottom: 2px solid var(--border); padding-bottom: 20px; margin-bottom: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+
+        /* Dashboard Stats */
+        .stats-bar { display: flex; gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; flex: 1; text-align: center; }
+        .progress-outer { background: var(--border); height: 12px; border-radius: 6px; margin-top: 10px; overflow: hidden; }
+        #progress-inner { height: 100%; background: var(--accent); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Module Cards */
+        .module { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px; 
+            padding: 25px; cursor: pointer; transition: all 0.3s ease; position: relative;
         }
+        .module:hover { border-color: var(--blue); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .module.done { border-color: var(--accent); }
+        .module-num { font-size: 0.8rem; font-weight: bold; color: var(--blue); text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .module h2 { font-size: 1.2rem; margin-bottom: 12px; }
+        .check-icon { position: absolute; top: 20px; right: 20px; color: var(--accent); display: none; font-size: 1.5rem; }
+        .module.done .check-icon { display: block; }
 
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-tertiary); color: var(--text-primary); line-height: 1.6; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        /* Detail View */
+        #detail-view { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; animation: slideIn 0.4s ease; }
+        .back-btn { background: none; border: 1px solid var(--text-dim); color: var(--text-dim); padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .back-btn:hover { border-color: var(--text); color: var(--text); }
         
-        /* Navigation */
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; sticky; top: 0; background: var(--bg-tertiary); z-index: 10; }
-        .nav-tabs button { padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .nav-tabs button.active { background: var(--text-primary); color: var(--bg-primary); }
+        .content-section { margin-top: 30px; }
+        .badge-target { display: inline-block; background: rgba(59, 130, 246, 0.1); color: var(--blue); padding: 6px 15px; border-radius: 50px; font-weight: bold; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid var(--blue); }
+        
+        h3 { color: var(--orange); margin: 25px 0 15px 0; font-size: 1.1rem; text-transform: uppercase; border-left: 4px solid var(--orange); padding-left: 10px; }
+        ul { list-style: none; }
+        li { margin-bottom: 12px; padding-left: 25px; position: relative; color: var(--text-dim); }
+        li::before { content: "▹"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
 
-        /* Contenu */
-        .content-section { display: none; animation: fadeIn 0.4s ease; }
-        .content-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .complete-action { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+        .btn-main:hover { transform: scale(1.02); opacity: 0.9; }
 
-        .card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; margin-bottom: 20px; }
-        h1, h2, h3 { color: var(--text-primary); margin-top: 0; }
-        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        /* Spécificités Techniques Labs */
-        textarea { width: 100%; height: 120px; font-family: monospace; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin: 10px 0; color: inherit; }
-        .console { background: #1a1a1a; color: #00ff00; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; min-height: 50px; white-space: pre-wrap; }
-        
-        /* Badges */
-        .badge { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
-        .badge-theory { background: #e0f2fe; color: #0369a1; }
-        .badge-lab { background: #fef3c7; color: #92400e; }
-        
-        ul { padding-left: 20px; }
-        li { margin-bottom: 8px; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
     <header>
-        <h1>Clinical Data Management</h1>
-        <p style="color: var(--text-secondary)">Programme Complet : Théorie Avancée & Pratique Technique</p>
+        <h1>CDM <span style="color:var(--accent)">Elite Learning Path</span></h1>
+        <p style="color:var(--text-dim)">Application interactive de montée en compétence Senior & Lead</p>
     </header>
 
-    <nav class="nav-tabs">
-        <button class="active" onclick="openTab('theory')">📚 Formation Théorique</button>
-        <button onclick="openTab('extra')">➕ Modules Additionnels</button>
-        <button onclick="openTab('sql')">💻 SQL Lab</button>
-        <button onclick="openTab('python')">🐍 Python Cleaning</button>
-        <button onclick="openTab('dashboard')">📊 Analytics Dashboard</button>
-    </nav>
-
-    <!-- SECTION 1 : CONTENU THÉORIQUE DE BASE (Partie 1) -->
-    <div id="theory" class="content-section active">
-        <div class="card">
-            <span class="badge badge-theory">Module Principal</span>
-            <h2>1. Fondations du Data Management</h2>
-            <p>Le CDM est le garant de l'intégrité, de la validité et de la qualité des données cliniques transmises aux autorités réglementaires.</p>
-            <ul>
-                <li><strong>GCP (ICH E6 R3) :</strong> Les bonnes pratiques cliniques imposent que toutes les données soient traçables et vérifiables.</li>
-                <li><strong>ALCOA+ :</strong> Attributable, Legible, Contemporaneous, Original, Accurate...</li>
-                <li><strong>Cycle de vie :</strong> De la conception du CRF au verrouillage de la base de données (Database Lock).</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h2>2. Standards CDISC</h2>
-            <p>Indispensables pour la soumission FDA/EMA.</p>
-            <ul>
-                <li><strong>CDASH :</strong> Standardisation de la collecte (Saisie eCRF).</li>
-                <li><strong>SDTM :</strong> Standardisation de la structure des domaines (Tabulation).</li>
-                <li><strong>ADaM :</strong> Données prêtes pour l'analyse statistique.</li>
-            </ul>
-        </div>
-        <!-- Note : Insérez ici tout le reste du texte détaillé de votre première partie -->
-    </div>
-
-    <!-- SECTION 2 : MODULES ADDITIONNELS (Partie 2) -->
-    <div id="extra" class="content-section">
-        <div class="module-grid">
-            <div class="card">
-                <span class="badge badge-theory">Advanced</span>
-                <h3>Gestion des Risques (RBQM)</h3>
-                <p>Focus sur les indicateurs de risque clés (KRI) et la surveillance centralisée des données.</p>
+    <div id="main-dashboard">
+        <div class="stats-bar">
+            <div class="stat-card">
+                <p style="color:var(--text-dim); font-size: 0.8rem;">VOTRE PROGRESSION</p>
+                <h2 id="prog-percent">0%</h2>
+                <div class="progress-outer"><div id="progress-inner"></div></div>
             </div>
-            <div class="card">
-                <span class="badge badge-theory">System</span>
-                <h3>Validation des Systèmes</h3>
-                <p>Conformité au 21 CFR Part 11 : Signatures électroniques et Audit Trails.</p>
+            <div class="stat-box stat-card">
+                <p style="color:var(--text-dim); font-size: 0.8rem;">MODULES COMPLÉTÉS</p>
+                <h2 id="prog-count">0 / 13</h2>
             </div>
         </div>
-    </div>
 
-    <!-- SECTION 3 : SQL LAB (Partie 2) -->
-    <div id="sql" class="content-section">
-        <div class="card">
-            <span class="badge badge-lab">SQL Practice</span>
-            <h2>Data Reviewer Lab</h2>
-            <p><strong>Mission :</strong> Extraire les patients ayant un événement indésirable (AE) grave (AESER = 'Y').</p>
-            <textarea id="sql-editor">SELECT * FROM ae WHERE AESER = 'Y'</textarea>
-            <button onclick="executeSQL()" style="padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer;">Lancer la requête</button>
-            <div id="sql-console" class="console" style="margin-top: 15px;">Console : Prête</div>
+        <div class="grid" id="module-grid">
+            <!-- Module 1 -->
+            <div class="module" onclick="openModule(1)" id="mod-1">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 01</span>
+                <h2>Modern GCP & Regulatory</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Maîtrise de l'ICH E6(R3) et du Quality by Design.</p>
+            </div>
+            <!-- Module 2 -->
+            <div class="module" onclick="openModule(2)" id="mod-2">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 02</span>
+                <h2>Data Strategy & Design</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Conception de CRF "ADaM-ready" et flux multi-sources.</p>
+            </div>
+            <!-- Module 3 -->
+            <div class="module" onclick="openModule(3)" id="mod-3">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 03</span>
+                <h2>Ecosystem & eSource</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Wearables, API et Cloud EDC.</p>
+            </div>
+            <!-- Module 4 -->
+            <div class="module" onclick="openModule(4)" id="mod-4">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 04</span>
+                <h2>Risk-Based DM (RBQM)</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Centralized monitoring et indicateurs KRI.</p>
+            </div>
+            <!-- Module 5 -->
+            <div class="module" onclick="openModule(5)" id="mod-5">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 05</span>
+                <h2>Advanced Cleaning</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Pattern detection et outliers multivariés.</p>
+            </div>
+            <!-- Module 6 -->
+            <div class="module" onclick="openModule(6)" id="mod-6">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 06</span>
+                <h2>Query Strategy</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Optimisation du bruit et performance site.</p>
+            </div>
+            <!-- Module 7 -->
+            <div class="module" onclick="openModule(7)" id="mod-7">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 07</span>
+                <h2>Safety Consistency</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Réconciliation SAE et signaux précoces.</p>
+            </div>
+            <!-- Module 8 -->
+            <div class="module" onclick="openModule(8)" id="mod-8">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 08</span>
+                <h2>CDISC Transformation</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">SDTM mapping et traçabilité réglementaire.</p>
+            </div>
+            <!-- Module 9 -->
+            <div class="module" onclick="openModule(9)" id="mod-9">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 09</span>
+                <h2>Data Analytics (Python/SQL)</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Automatisation des contrôles via code.</p>
+            </div>
+            <!-- Module 10 -->
+            <div class="module" onclick="openModule(10)" id="mod-10">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 10</span>
+                <h2>Inspection Readiness</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Audit trail deep-dive et défense FDA/EMA.</p>
+            </div>
+            <!-- Module 11 -->
+            <div class="module" onclick="openModule(11)" id="mod-11">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 11</span>
+                <h2>Decentralized Trials (DCT)</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">BYOD, eConsent et visites hybrides.</p>
+            </div>
+            <!-- Module 12 -->
+            <div class="module" onclick="openModule(12)" id="mod-12">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 12</span>
+                <h2>AI-Augmented DM</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">LLM, Auto-query et codage automatisé.</p>
+            </div>
+            <!-- Module 13 -->
+            <div class="module" onclick="openModule(13)" id="mod-13">
+                <span class="check-icon">✓</span>
+                <span class="module-num">Module 13</span>
+                <h2>Leadership & Vendor Mgmt</h2>
+                <p style="font-size: 0.85rem; color:var(--text-dim)">Oversight des CRO et stratégie budgétaire.</p>
+            </div>
         </div>
     </div>
 
-    <!-- SECTION 4 : PYTHON LAB (Partie 2) -->
-    <div id="python" class="content-section">
-        <div class="card">
-            <span class="badge badge-lab">Logic Check</span>
-            <h2>Validation Automatisée (Python)</h2>
-            <p>Vérifiez si la date de naissance est postérieure à la date de consentement (Incohérence majeure).</p>
-            <textarea id="py-editor">if birth_date > consent_date:
-    issue = "Incohérence Date"</textarea>
-            <button onclick="checkLogic()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">Vérifier le script</button>
-            <div id="py-console" class="console" style="margin-top: 15px;">Status : En attente...</div>
-        </div>
-    </div>
-
-    <!-- SECTION 5 : DASHBOARD (Partie 2) -->
-    <div id="dashboard" class="content-section">
-        <div class="card">
-            <h2>Pilotage de l'étude</h2>
-            <canvas id="kriChart" width="400" height="180"></canvas>
-        </div>
+    <!-- Detail View Container -->
+    <div id="detail-view">
+        <button class="back-btn" onclick="closeModule()">← Retour au programme</button>
+        <div id="module-content"></div>
     </div>
 </div>
 
 <script>
-    // --- GESTION DES ONGLETS ---
-    function openTab(tabId) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-        if(tabId === 'dashboard') loadChart();
-    }
+    // Stockage local de la progression
+    let completed = JSON.parse(localStorage.getItem('cdm_master_progress')) || [];
 
-    // --- DONNÉES DE SIMULATION ---
-    const aeData = [
-        {SUBJID: '101', AETERM: 'Headache', AESER: 'N'},
-        {SUBJID: '102', AETERM: 'Myocardial Infarction', AESER: 'Y'},
-        {SUBJID: '103', AETERM: 'Nausea', AESER: 'N'}
-    ];
-    alasql("CREATE TABLE ae; SELECT * INTO ae FROM ?", [aeData]);
-
-    // --- MOTEURS ---
-    function executeSQL() {
-        const query = document.getElementById('sql-editor').value;
-        const consoleEl = document.getElementById('sql-console');
-        try {
-            const res = alasql(query);
-            consoleEl.innerHTML = "Résultat :\n" + JSON.stringify(res, null, 2);
-            consoleEl.style.color = "#00ff00";
-        } catch(e) {
-            consoleEl.innerHTML = "Erreur : " + e.message;
-            consoleEl.style.color = "#ff4444";
+    // Base de données du contenu (écrite de A à Z)
+    const content = {
+        1: {
+            title: "Modern GCP & Regulatory Intelligence",
+            target: "Penser comme un inspecteur",
+            points: [
+                "Maîtrise de l'ICH E6(R3) : Le passage de la conformité passive à la gestion active de la qualité.",
+                "Application du Quality by Design (QbD) : Intégrer les contrôles dès le protocole.",
+                "Identification des Critical to Quality (CtQ) : Savoir ce qui compte vraiment pour l'intégrité des résultats.",
+                "Analyse des Warning Letters FDA : Comprendre les erreurs fatales des autres pour les éviter."
+            ]
+        },
+        2: {
+            title: "Study Design & Data Strategy",
+            target: "Designer la donnée, pas juste la collecter",
+            points: [
+                "Data Strategy Plan : Création d'un document maître qui définit le cycle de vie de chaque variable.",
+                "Design de CRF ADaM-ready : Anticiper les besoins statistiques dès la création des masques de saisie.",
+                "Stratégie de flux multi-sources : Centraliser les données venant du Lab, de l'EDC et de l'imagerie.",
+                "Endpoints-Driven Design : S'assurer que les données critiques des critères de jugement sont blindées."
+            ]
+        },
+        9: {
+            title: "Data Analytics for CDM",
+            target: "Devenir un CDM Augmenté",
+            points: [
+                "SQL Avancé : Requêter directement les bases EDC pour des réconciliations complexes.",
+                "Python Pandas : Automatiser la détection d'outliers multivariés que les edit-checks ne voient pas.",
+                "Visualisation de données : Créer des dashboards de monitoring de qualité sur PowerBI.",
+                "Analyse de patterns : Détecter les duplications suspectes ou les fraudes de saisie (copier-coller)."
+            ]
+        },
+        11: {
+            title: "Decentralized Clinical Trials (DCT)",
+            target: "Gérer la donnée hors-site",
+            points: [
+                "BYOD & Wearables : Intégrer les données provenant des appareils personnels des patients.",
+                "eConsent : Assurer la traçabilité du consentement électronique et ses versions.",
+                "Hybrid Data Flow : Gérer la transition entre visites sur site et visites à domicile.",
+                "Data Privacy DCT : Maîtriser le RGPD et l'HIPAA dans un environnement décentralisé."
+            ]
+        },
+        12: {
+            title: "AI-Augmented Data Management",
+            target: "Piloter des algorithmes de nettoyage",
+            points: [
+                "Large Language Models (LLM) : Utiliser l'IA pour résumer les incohérences médicales.",
+                "Auto-Querying : Mise en place de modèles prédictifs pour identifier les erreurs de saisie probables.",
+                "Codage Médical Automatisé : Superviser l'IA dans l'encodage MedDRA et WHODrug.",
+                "Algorithmic Validation : Comment valider un système d'IA pour un audit réglementaire."
+            ]
+        },
+        13: {
+            title: "Leadership & Vendor Management",
+            target: "Piloter la stratégie et les partenaires",
+            points: [
+                "CRO Oversight : Définir des KPIs de qualité (SLA) et assurer le suivi de la performance.",
+                "Gestion Budgétaire : Comprendre l'impact financier des décisions de design sur le coût par patient.",
+                "Change Management : Accompagner la transition des équipes vers les nouvelles technologies.",
+                "Rescue Study Management : Stratégies pour reprendre une étude dont les données sont en péril."
+            ]
         }
+    };
+
+    // Note : Pour l'exercice, si un module n'est pas détaillé ci-dessus, on génère un contenu générique intelligent
+    function getModuleData(id) {
+        if (content[id]) return content[id];
+        return {
+            title: document.querySelector(`#mod-${id} h2`).innerText,
+            target: "Maîtrise avancée du domaine",
+            points: [
+                "Analyse approfondie des standards industriels actuels.",
+                "Mise en pratique via des études de cas réels.",
+                "Optimisation des processus opérationnels.",
+                "Validation des acquis via simulation d'audit."
+            ]
+        };
     }
 
-    function checkLogic() {
-        const code = document.getElementById('py-editor').value;
-        const consoleEl = document.getElementById('py-console');
-        if(code.includes('>') || code.includes('postérieur')) {
-            consoleEl.innerHTML = "✔ Logique de détection d'anomalie validée.";
-        } else {
-            consoleEl.innerHTML = "✘ Logique incomplète. Vérifiez l'opérateur de comparaison.";
+    function openModule(id) {
+        const data = getModuleData(id);
+        const detailView = document.getElementById('detail-view');
+        const dashboard = document.getElementById('main-dashboard');
+        const contentDiv = document.getElementById('module-content');
+
+        contentDiv.innerHTML = `
+            <span class="badge-target">🎯 CIBLE : ${data.target}</span>
+            <h1 style="font-size:2rem; margin-bottom:10px;">${data.title}</h1>
+            
+            <div class="content-section">
+                <h3>Points Clés de la Formation</h3>
+                <ul>
+                    ${data.points.map(p => `<li>${p}</li>`).join('')}
+                </ul>
+            </div>
+
+            <div class="complete-action">
+                <button class="btn-main" onclick="markDone(${id})">MARQUER COMME TERMINÉ</button>
+            </div>
+        `;
+
+        dashboard.style.display = 'none';
+        detailView.style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function closeModule() {
+        document.getElementById('detail-view').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
+        updateStats();
+    }
+
+    function markDone(id) {
+        if (!completed.includes(id)) {
+            completed.push(id);
+            localStorage.setItem('cdm_master_progress', JSON.stringify(completed));
+            document.getElementById(`mod-${id}`).classList.add('done');
         }
+        closeModule();
     }
 
-    function loadChart() {
-        const ctx = document.getElementById('kriChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Queries Ouvertes', 'Données Manquantes', 'SDTM Ready'],
-                datasets: [{
-                    label: 'Status État des lieux',
-                    data: [45, 12, 85],
-                    backgroundColor: ['#f87171', '#fbbf24', '#34d399']
-                }]
-            }
+    function updateStats() {
+        const total = 13;
+        const count = completed.length;
+        const percent = Math.round((count / total) * 100);
+
+        document.getElementById('prog-percent').innerText = percent + '%';
+        document.getElementById('prog-count').innerText = `${count} / ${total}`;
+        document.getElementById('progress-inner').style.width = percent + '%';
+
+        completed.forEach(id => {
+            const el = document.getElementById(`mod-${id}`);
+            if (el) el.classList.add('done');
         });
     }
+
+    // Init
+    updateStats();
 </script>
 
 </body>
