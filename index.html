@@ -3,36 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDM Ultimate Platform — Smart SQL + Real Dataset</title>
+<title>CDM Training Platform — Ultimate Version</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/1.7.6/alasql.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:20px; }
-textarea { width:100%; height:100px; }
-.card { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
-.correct{color:green;} .wrong{color:red;}
+body { font-family: Arial; margin:0; background:#f4f6f8; }
+.app { max-width:1200px; margin:auto; padding:20px; }
+
+h1 { font-size:26px; }
+
+.nav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+button {
+  padding:8px 14px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  cursor:pointer;
+  background:white;
+}
+button.active { background:#222; color:white; }
+
+.page { display:none; }
+.page.active { display:block; }
+
+.card {
+  background:white;
+  padding:16px;
+  border-radius:10px;
+  margin-bottom:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+textarea { width:100%; height:120px; }
+
+.correct { color:green; }
+.wrong { color:red; }
+
+pre {
+  background:#eee;
+  padding:10px;
+  border-radius:6px;
+  overflow:auto;
+}
 </style>
 </head>
-<body>
-<h1>CDM Training — Smart SQL Engine</h1>
 
-<div class="card">
-<h3>Dataset Preview</h3>
-<pre id="dataPreview"></pre>
+<body>
+<div class="app">
+
+<h1>Clinical Data Manager — Ultimate Training Platform</h1>
+
+<div class="nav">
+<button onclick="showPage('modules')" class="active">Modules</button>
+<button onclick="showPage('dataset')">Dataset</button>
+<button onclick="showPage('cases')">Clinical Cases</button>
+<button onclick="showPage('quiz')">Quiz</button>
+<button onclick="showPage('sql')">SQL Lab</button>
+<button onclick="showPage('python')">Python Lab</button>
+<button onclick="showPage('dashboard')">Dashboard</button>
 </div>
 
-<div class="card">
-<h3>Exercise: Find subjects with missing AE start date</h3>
-<textarea id="sqlInput"></textarea>
-<button onclick="runSQL()">Run</button>
-<pre id="output"></pre>
+<div id="modules" class="page active"></div>
+<div id="dataset" class="page"></div>
+<div id="cases" class="page"></div>
+<div id="quiz" class="page"></div>
+<div id="sql" class="page"></div>
+<div id="python" class="page"></div>
+<div id="dashboard" class="page"></div>
+
 </div>
 
 <script>
 
-// REALISTIC DATASET (simplified SDTM-like)
+// =======================
+// 📊 DATASET (REALISTIC)
+// =======================
+
 const dm = [
- {USUBJID:'01', SEX:'M'},
- {USUBJID:'02', SEX:'F'}
+ {USUBJID:'01', SEX:'M', AGE:45},
+ {USUBJID:'02', SEX:'F', AGE:60}
 ];
 
 const ae = [
@@ -45,46 +95,194 @@ const lb = [
  {USUBJID:'02', LBTEST:'ALT', LBSTRESN:25}
 ];
 
-// LOAD DB
+// DB
 alasql('CREATE TABLE dm');
 alasql('CREATE TABLE ae');
 alasql('CREATE TABLE lb');
+
 alasql.tables.dm.data = dm;
 alasql.tables.ae.data = ae;
 alasql.tables.lb.data = lb;
 
-// PREVIEW
-function preview(){
- document.getElementById('dataPreview').innerText = JSON.stringify({dm,ae,lb},null,2);
+// =======================
+// 🧭 NAVIGATION
+// =======================
+
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
 }
 
-// SMART SQL CHECK
+// =======================
+// 📘 MODULES
+// =======================
+
+function renderModules(){
+ document.getElementById('modules').innerHTML = `
+ <div class="card">
+ <h2>Modules (CDM 2025+)</h2>
+ <ul>
+ <li>ICH E6(R3), QbD, CtQ</li>
+ <li>Risk-Based Data Management</li>
+ <li>Data Integrity (ALCOA++)</li>
+ <li>Centralized Monitoring & KRIs</li>
+ <li>CDISC (SDTM / ADaM)</li>
+ </ul>
+ </div>
+ `;
+}
+
+// =======================
+// 📊 DATASET VIEW
+// =======================
+
+function renderDataset(){
+ document.getElementById('dataset').innerHTML = `
+ <div class="card">
+ <h2>Dataset Preview</h2>
+ <pre>${JSON.stringify({dm, ae, lb}, null, 2)}</pre>
+ </div>
+ `;
+}
+
+// =======================
+// 🧪 CLINICAL CASES
+// =======================
+
+function renderCases(){
+ document.getElementById('cases').innerHTML = `
+ <div class="card">
+ <h3>Case: SAE mismatch</h3>
+ <p>AE present in EDC but missing in Safety DB. What do you do?</p>
+ <textarea></textarea>
+ <button onclick="alert('Expected: reconcile, notify safety, document')">Check</button>
+ </div>
+ `;
+}
+
+// =======================
+// ❓ QUIZ
+// =======================
+
+let score = 0;
+
+function renderQuiz(){
+ document.getElementById('quiz').innerHTML = `
+ <div class="card">
+ <h3>What is CtQ?</h3>
+ <button onclick="quiz(true)">Critical to Quality</button>
+ <button onclick="quiz(false)">Control to Query</button>
+ <p id="quizResult"></p>
+ </div>
+ `;
+}
+
+function quiz(correct){
+ let el = document.getElementById('quizResult');
+ if(correct){
+   el.innerHTML = '<span class="correct">Correct</span>';
+   score++;
+ } else {
+   el.innerHTML = '<span class="wrong">Wrong</span>';
+ }
+}
+
+// =======================
+// 💻 SQL LAB (SMART)
+// =======================
+
+function renderSQL(){
+ document.getElementById('sql').innerHTML = `
+ <div class="card">
+ <h3>Exercise: Missing AE start date</h3>
+ <textarea id="sqlInput"></textarea>
+ <button onclick="runSQL()">Run</button>
+ <pre id="sqlOutput"></pre>
+ </div>
+ `;
+}
+
 function runSQL(){
  let query = document.getElementById('sqlInput').value.toLowerCase();
- let output = document.getElementById('output');
+ let output = document.getElementById('sqlOutput');
 
- try{
- let res = alasql(query);
- output.innerText = JSON.stringify(res,null,2);
+ try {
+   let res = alasql(query);
+   output.innerText = JSON.stringify(res, null, 2);
 
- // SMART FEEDBACK
- if(!query.includes('from ae')){
- output.innerHTML += '\n<span class="wrong">Hint: use AE table</span>';
- }
- if(!query.includes('null')){
- output.innerHTML += '\n<span class="wrong">Hint: check NULL values</span>';
- }
- if(query.includes('select') && query.includes('from ae') && query.includes('null')){
- output.innerHTML += '\n<span class="correct">Good logic ✔</span>';
- }
+   if(!query.includes('from ae')){
+     output.innerHTML += '\\n<span class=\"wrong\">Use AE table</span>';
+   }
+   if(!query.includes('null')){
+     output.innerHTML += '\\n<span class=\"wrong\">Check NULL</span>';
+   }
+   if(query.includes('select') && query.includes('from ae') && query.includes('null')){
+     output.innerHTML += '\\n<span class=\"correct\">✔ Good query</span>';
+   }
 
  } catch(e){
- output.innerHTML = '<span class="wrong">SQL Error: '+e.message+'</span>';
+   output.innerHTML = '<span class=\"wrong\">SQL Error: '+e.message+'</span>';
  }
 }
 
-preview();
+// =======================
+// 🐍 PYTHON LAB (LOGIC)
+// =======================
+
+function renderPython(){
+ document.getElementById('python').innerHTML = `
+ <div class="card">
+ <h3>Detect ALT > 40</h3>
+ <textarea id="pyInput"></textarea>
+ <button onclick="checkPython()">Validate</button>
+ <p id="pyOutput"></p>
+ </div>
+ `;
+}
+
+function checkPython(){
+ let code = document.getElementById('pyInput').value;
+ if(code.includes('>40')){
+   document.getElementById('pyOutput').innerHTML='<span class=\"correct\">Correct logic</span>';
+ } else {
+   document.getElementById('pyOutput').innerHTML='<span class=\"wrong\">Missing threshold</span>';
+ }
+}
+
+// =======================
+// 📈 DASHBOARD
+// =======================
+
+function renderDashboard(){
+ document.getElementById('dashboard').innerHTML = `
+ <div class="card">
+ <h2>Signals</h2>
+ <canvas id="chart"></canvas>
+ </div>
+ `;
+
+ new Chart(document.getElementById('chart'), {
+   type:'bar',
+   data:{
+     labels:['Missing AE','High ALT'],
+     datasets:[{data:[1,1]}]
+   }
+ });
+}
+
+// =======================
+// 🚀 INIT
+// =======================
+
+renderModules();
+renderDataset();
+renderCases();
+renderQuiz();
+renderSQL();
+renderPython();
+renderDashboard();
 
 </script>
+
 </body>
 </html>
