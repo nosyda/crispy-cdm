@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDM Training Program - Full Content Edition</title>
+    
+    <!-- Moteurs dynamiques de la partie 2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/1.7.6/alasql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f5f5f3; --bg-tertiary: #eeece6;
+            --text-primary: #1a1a18; --text-secondary: #5f5e5a;
+            --accent: #1d9e75; --border: rgba(0,0,0,0.12);
+            --radius: 10px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1e1e1c; --bg-secondary: #2a2a28; --bg-tertiary: #121211;
+                --text-primary: #f0ede6; --text-secondary: #a8a59e; --border: rgba(255,255,255,0.1);
+            }
+        }
+
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-tertiary); color: var(--text-primary); line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Navigation */
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; sticky; top: 0; background: var(--bg-tertiary); z-index: 10; }
+        .nav-tabs button { padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .nav-tabs button.active { background: var(--text-primary); color: var(--bg-primary); }
+
+        /* Contenu */
+        .content-section { display: none; animation: fadeIn 0.4s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; margin-bottom: 20px; }
+        h1, h2, h3 { color: var(--text-primary); margin-top: 0; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        /* Spécificités Techniques Labs */
+        textarea { width: 100%; height: 120px; font-family: monospace; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin: 10px 0; color: inherit; }
+        .console { background: #1a1a1a; color: #00ff00; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; min-height: 50px; white-space: pre-wrap; }
+        
+        /* Badges */
+        .badge { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
+        .badge-theory { background: #e0f2fe; color: #0369a1; }
+        .badge-lab { background: #fef3c7; color: #92400e; }
+        
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Clinical Data Management</h1>
+        <p style="color: var(--text-secondary)">Programme Complet : Théorie Avancée & Pratique Technique</p>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="active" onclick="openTab('theory')">📚 Formation Théorique</button>
+        <button onclick="openTab('extra')">➕ Modules Additionnels</button>
+        <button onclick="openTab('sql')">💻 SQL Lab</button>
+        <button onclick="openTab('python')">🐍 Python Cleaning</button>
+        <button onclick="openTab('dashboard')">📊 Analytics Dashboard</button>
+    </nav>
+
+    <!-- SECTION 1 : CONTENU THÉORIQUE DE BASE (Partie 1) -->
+    <div id="theory" class="content-section active">
+        <div class="card">
+            <span class="badge badge-theory">Module Principal</span>
+            <h2>1. Fondations du Data Management</h2>
+            <p>Le CDM est le garant de l'intégrité, de la validité et de la qualité des données cliniques transmises aux autorités réglementaires.</p>
+            <ul>
+                <li><strong>GCP (ICH E6 R3) :</strong> Les bonnes pratiques cliniques imposent que toutes les données soient traçables et vérifiables.</li>
+                <li><strong>ALCOA+ :</strong> Attributable, Legible, Contemporaneous, Original, Accurate...</li>
+                <li><strong>Cycle de vie :</strong> De la conception du CRF au verrouillage de la base de données (Database Lock).</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>2. Standards CDISC</h2>
+            <p>Indispensables pour la soumission FDA/EMA.</p>
+            <ul>
+                <li><strong>CDASH :</strong> Standardisation de la collecte (Saisie eCRF).</li>
+                <li><strong>SDTM :</strong> Standardisation de la structure des domaines (Tabulation).</li>
+                <li><strong>ADaM :</strong> Données prêtes pour l'analyse statistique.</li>
+            </ul>
+        </div>
+        <!-- Note : Insérez ici tout le reste du texte détaillé de votre première partie -->
+    </div>
+
+    <!-- SECTION 2 : MODULES ADDITIONNELS (Partie 2) -->
+    <div id="extra" class="content-section">
+        <div class="module-grid">
+            <div class="card">
+                <span class="badge badge-theory">Advanced</span>
+                <h3>Gestion des Risques (RBQM)</h3>
+                <p>Focus sur les indicateurs de risque clés (KRI) et la surveillance centralisée des données.</p>
+            </div>
+            <div class="card">
+                <span class="badge badge-theory">System</span>
+                <h3>Validation des Systèmes</h3>
+                <p>Conformité au 21 CFR Part 11 : Signatures électroniques et Audit Trails.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3 : SQL LAB (Partie 2) -->
+    <div id="sql" class="content-section">
+        <div class="card">
+            <span class="badge badge-lab">SQL Practice</span>
+            <h2>Data Reviewer Lab</h2>
+            <p><strong>Mission :</strong> Extraire les patients ayant un événement indésirable (AE) grave (AESER = 'Y').</p>
+            <textarea id="sql-editor">SELECT * FROM ae WHERE AESER = 'Y'</textarea>
+            <button onclick="executeSQL()" style="padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer;">Lancer la requête</button>
+            <div id="sql-console" class="console" style="margin-top: 15px;">Console : Prête</div>
+        </div>
+    </div>
+
+    <!-- SECTION 4 : PYTHON LAB (Partie 2) -->
+    <div id="python" class="content-section">
+        <div class="card">
+            <span class="badge badge-lab">Logic Check</span>
+            <h2>Validation Automatisée (Python)</h2>
+            <p>Vérifiez si la date de naissance est postérieure à la date de consentement (Incohérence majeure).</p>
+            <textarea id="py-editor">if birth_date > consent_date:
+    issue = "Incohérence Date"</textarea>
+            <button onclick="checkLogic()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">Vérifier le script</button>
+            <div id="py-console" class="console" style="margin-top: 15px;">Status : En attente...</div>
+        </div>
+    </div>
+
+    <!-- SECTION 5 : DASHBOARD (Partie 2) -->
+    <div id="dashboard" class="content-section">
+        <div class="card">
+            <h2>Pilotage de l'étude</h2>
+            <canvas id="kriChart" width="400" height="180"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- GESTION DES ONGLETS ---
+    function openTab(tabId) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(tabId === 'dashboard') loadChart();
+    }
+
+    // --- DONNÉES DE SIMULATION ---
+    const aeData = [
+        {SUBJID: '101', AETERM: 'Headache', AESER: 'N'},
+        {SUBJID: '102', AETERM: 'Myocardial Infarction', AESER: 'Y'},
+        {SUBJID: '103', AETERM: 'Nausea', AESER: 'N'}
+    ];
+    alasql("CREATE TABLE ae; SELECT * INTO ae FROM ?", [aeData]);
+
+    // --- MOTEURS ---
+    function executeSQL() {
+        const query = document.getElementById('sql-editor').value;
+        const consoleEl = document.getElementById('sql-console');
+        try {
+            const res = alasql(query);
+            consoleEl.innerHTML = "Résultat :\n" + JSON.stringify(res, null, 2);
+            consoleEl.style.color = "#00ff00";
+        } catch(e) {
+            consoleEl.innerHTML = "Erreur : " + e.message;
+            consoleEl.style.color = "#ff4444";
+        }
+    }
+
+    function checkLogic() {
+        const code = document.getElementById('py-editor').value;
+        const consoleEl = document.getElementById('py-console');
+        if(code.includes('>') || code.includes('postérieur')) {
+            consoleEl.innerHTML = "✔ Logique de détection d'anomalie validée.";
+        } else {
+            consoleEl.innerHTML = "✘ Logique incomplète. Vérifiez l'opérateur de comparaison.";
+        }
+    }
+
+    function loadChart() {
+        const ctx = document.getElementById('kriChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Queries Ouvertes', 'Données Manquantes', 'SDTM Ready'],
+                datasets: [{
+                    label: 'Status État des lieux',
+                    data: [45, 12, 85],
+                    backgroundColor: ['#f87171', '#fbbf24', '#34d399']
+                }]
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
